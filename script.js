@@ -2,15 +2,20 @@ let data = {};
 
 // Load the JSON mappings file
 async function init() {
-  const res = await fetch("mappings.json");
-  data = await res.json();
+  try {
+    const res = await fetch("mappings.json");
+    data = await res.json();
+    console.log("✅ Loaded data:", data);
+  } catch (err) {
+    console.error("❌ Error loading mappings.json:", err);
+  }
 }
 
 // Search questions based on lectures completed
 function search() {
   const lectureInput = document.getElementById("lectures").value.trim();
-
   let maxNum = parseInt(lectureInput);
+
   if (isNaN(maxNum) || maxNum < 1) {
     alert("Please enter a valid lecture number (≥1)");
     return;
@@ -21,9 +26,11 @@ function search() {
   for (let i = 1; i <= maxNum; i++) {
     lectures.push("Lecture " + i);
   }
+  console.log("🔎 Searching with lectures:", lectures);
 
-  // Find suggestions for these lectures
+  // Find matches
   let results = findQuestions(lectures, data);
+  console.log("📌 Results found:", results);
 
   // Render results
   let list = document.getElementById("results");
@@ -33,36 +40,56 @@ function search() {
   } else {
     results.forEach((r) => {
       let li = document.createElement("li");
-      li.innerHTML = `${r.exam} - ${r.section}` + (r.question ? (" - Q" + r.question) : "");
+      // Show exam + section + (optional) question
+      li.innerHTML = `${r.exam}` 
+                   + (r.section ? " - " + r.section : "") 
+                   + (r.question ? " - " + r.question : "");
       li.onclick = () => li.classList.toggle("done");
       list.appendChild(li);
     });
   }
 }
 
-// Core logic: match lectures against question mappings
+// Core logic: recursively match lectures against question mappings
 function findQuestions(lectures, dataset) {
   let suggestions = [];
-  for (let exam in dataset) {
-    for (let section in dataset[exam]) {
-      let questions = dataset[exam][section];
-      // Case: nested object { "1.1": ["Lecture X"] }
-      if (typeof questions === "object" && !Array.isArray(questions)) {
-        for (let q in questions) {
-          if (questions[q].some(l => lectures.includes(l))) {
-            suggestions.push({ exam, section, question: q });
-          }
+
+  function checkNode(node, exam, section, question) {
+    if (Array.isArray(node)) {
+      // At leaf: check if lectures intersect
+      if (node.some(l => lectures.includes(l))) {
+        suggestions.push({
+          exam,
+          section: section || null,
+          question: question || null
+        });
+      }
+    } else if (typeof node === "object" && node !== null) {
+      // Recurse deeper
+      for (let key in node) {
+        let nextSection = section;
+        let nextQuestion = question;
+
+        // If key looks like "Part 1" or "Exercise 1"
+        if (key.toLowerCase().includes("part") || key.toLowerCase().includes("exercise")) {
+          nextSection = key;
         }
-      } 
-      // Case: array ["Lecture X", "Lecture Y"]
-      else if (Array.isArray(questions)) {
-        if (questions.some(l => lectures.includes(l))) {
-          suggestions.push({ exam, section });
+        // If key looks like a question label "Q1", "Q2"
+        else if (key.startsWith("Q") || key.match(/^\d+(\.\d+)?$/)) {
+          nextQuestion = key;
         }
+
+        checkNode(node[key], exam, nextSection, nextQuestion);
       }
     }
   }
+
+  for (let exam in dataset) {
+    checkNode(dataset[exam], exam, null, null);
+  }
+
   return suggestions;
 }
 
+// Initialize on page load
 init();

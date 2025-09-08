@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Exam Question Mapper</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2 { color: #333; }
+    input, button { margin: 5px; padding: 8px; }
+    ul { list-style-type: none; padding: 0; }
+    li { padding: 5px; border-bottom: 1px solid #ddd; cursor: pointer; }
+    li.done { text-decoration: line-through; color: gray; }
+  </style>
+</head>
+<body>
+  <h1>Exam Question Mapper</h1>
+  <p>Enter the number of lectures you have completed (e.g., 4 = Lectures 1-4)</p>
+  <input type="number" id="lectures" placeholder="Enter max lecture number">
+  <button onclick="search()">Find Questions</button>
+  <h2>Practice Suggestions</h2>
+  <ul id="results"></ul>

@@ -90,8 +90,7 @@
     },
     "Exercise 2": ["Lecture 14", "Lecture 15"],
     "Exercise 3": ["Lecture 20"]
-  }
-}{
+  },
   "Econ_707_field_exam_2016": {
     "All": ["Lecture 19", "Lecture 20"]
   },
@@ -110,10 +109,10 @@
   },
   "Econ_707_qualifying_exam_2015": {
     "Exercise 1": {
-      "Q1–Q5": ["Lecture 18", "Lecture 19", "Lecture 20"],
-      "Q6–Q7": ["Lecture 2", "Lecture 12"]
+      "Q1_to_Q5": ["Lecture 18", "Lecture 19", "Lecture 20"],
+      "Q6_to_Q7": ["Lecture 2", "Lecture 12"]
     },
-    "Exercise 2": ["707 only (not covered in 703)"]
+    "Exercise 2": ["Not covered in 703"]
   },
   "Econ_707_qualifying_exam_2016": {
     "Exercise 1": {

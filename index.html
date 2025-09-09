@@ -12,21 +12,31 @@
     li { padding: 5px; border-bottom: 1px solid #ddd; cursor: pointer; }
     li.done { text-decoration: line-through; color: gray; }
     .container { max-width: 700px; margin: auto; }
+    .help { background: #eef; padding: 10px; margin-top: 10px; border-left: 4px solid #66f; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Exam Question Mapper</h1>
-    <p>Enter the number of lectures you have completed (e.g., 4 = Lectures 1–4)</p>
-    
-    <input type="number" id="lectures" placeholder="Enter max lecture number">
+
+    <p>Enter your lectures completed. Multiple formats are supported:</p>
+    <div class="help">
+      <ul>
+        <li><b>4</b> → expands to Lectures <b>1, 2, 3, 4</b></li>
+        <li><b>4-6</b> → expands to Lectures <b>4, 5, 6</b></li>
+        <li><b>only4</b> → just Lecture <b>4</b></li>
+        <li><b>2,5,10</b> → specific Lectures <b>2, 5, 10</b></li>
+      </ul>
+    </div>
+
+    <input type="text" id="lectures" placeholder="e.g. 4, or 4-6, or only4, or 2,5,10">
     <button onclick="search()">Find Questions</button>
 
     <h2>Practice Suggestions</h2>
     <ul id="results"></ul>
   </div>
 
-  <!-- Link to your JavaScript file -->
+  <!-- Link to your updated script -->
   <script src="script.js"></script>
 </body>
 </html>

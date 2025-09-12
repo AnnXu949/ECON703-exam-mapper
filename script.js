@@ -1,56 +1,27 @@
+let data = {};
+
+// 初始化，加载 mappings.json
+async function init() {
+  try {
+    const res = await fetch("mappings.json");
+    data = await res.json();
+    console.log("✅ Loaded data:", data);
+  } catch (err) {
+    console.error("❌ Error loading mappings.json:", err);
+  }
+}
+
+// 点击按钮后运行
 function search() {
   const lectureInput = document.getElementById("lectures").value.trim();
-  let lectures = [];
-
-  if (!lectureInput) {
-    alert("Please enter a valid input");
-    return;
-  }
-
-  // Case 1: onlyX → exactly that lecture
-  if (lectureInput.toLowerCase().startsWith("only")) {
-    let num = parseInt(lectureInput.replace(/[^0-9]/g, ""));
-    if (!isNaN(num)) {
-      lectures.push("Lecture " + num);
-    }
-  }
-  // Case 2: range like 4-6
-  else if (lectureInput.includes("-")) {
-    let parts = lectureInput.split("-");
-    let start = parseInt(parts[0]);
-    let end = parseInt(parts[1]);
-    if (!isNaN(start) && !isNaN(end) && start <= end) {
-      for (let i = start; i <= end; i++) {
-        lectures.push("Lecture " + i);
-      }
-    }
-  }
-  // Case 3: comma-separated list like 2,5,10
-  else if (lectureInput.includes(",")) {
-    lectureInput.split(",").forEach(num => {
-      let n = parseInt(num.trim());
-      if (!isNaN(n)) {
-        lectures.push("Lecture " + n);
-      }
-    });
-  }
-  // Case 4: single number N → Lectures 1...N
-  else {
-    let maxNum = parseInt(lectureInput);
-    if (!isNaN(maxNum) && maxNum >= 1) {
-      for (let i = 1; i <= maxNum; i++) {
-        lectures.push("Lecture " + i);
-      }
-    }
-  }
+  let lectures = parseInput(lectureInput);
 
   console.log("🔎 Searching with lectures:", lectures);
 
-  // Find matches
-  let results = findQuestions(lectures, data);
+  let results = findQuestions(lectures, data);   // 👈 确保此函数定义了
   console.log("📌 Results found:", results);
 
-  // Render results
+  // 输出到页面
   let list = document.getElementById("results");
   list.innerHTML = "";
   if (results.length === 0) {
@@ -66,3 +37,72 @@ function search() {
     });
   }
 }
+
+// 🔧 输入解析器，允许多种输入形式
+function parseInput(input) {
+  let lectures = [];
+
+  if (!input) return lectures;
+
+  // onlyX 模式
+  if (input.toLowerCase().startsWith("only")) {
+    let num = parseInt(input.replace(/[^0-9]/g, ""));
+    if (!isNaN(num)) lectures.push("Lecture " + num);
+  }
+  // 范围 (4-6)
+  else if (input.includes("-")) {
+    let [start, end] = input.split("-").map(x => parseInt(x.trim()));
+    if (!isNaN(start) && !isNaN(end) && start <= end) {
+      for (let i = start; i <= end; i++) {
+        lectures.push("Lecture " + i);
+      }
+    }
+  }
+  // 列表 (2,5,10)
+  else if (input.includes(",")) {
+    input.split(",").forEach(num => {
+      let n = parseInt(num.trim());
+      if (!isNaN(n)) lectures.push("Lecture " + n);
+    });
+  }
+  // 单一数字 (4 → 1到4)
+  else {
+    let maxNum = parseInt(input);
+    if (!isNaN(maxNum) && maxNum >= 1) {
+      for (let i = 1; i <= maxNum; i++) {
+        lectures.push("Lecture " + i);
+      }
+    }
+  }
+  return lectures;
+}
+
+// 🔍 递归搜索匹配的题
+function findQuestions(lectures, dataset) {
+  let suggestions = [];
+
+  function checkNode(node, exam, path = []) {
+    if (Array.isArray(node)) {
+      if (node.some(l => lectures.includes(l))) {
+        suggestions.push({
+          exam,
+          section: path.find(p => p.toLowerCase().includes("part") || p.toLowerCase().includes("exercise")) || null,
+          question: path.find(p => p.startsWith("Q") || p.match(/^\d+(\.\d+)?$/)) || null
+        });
+      }
+    } else if (typeof node === "object" && node !== null) {
+      for (let key in node) {
+        checkNode(node[key], exam, [...path, key]);
+      }
+    }
+  }
+
+  for (let exam in dataset) {
+    checkNode(dataset[exam], exam, []);
+  }
+
+  return suggestions;
+}
+
+// 加载数据
+init();
